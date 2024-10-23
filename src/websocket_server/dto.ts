@@ -1,7 +1,11 @@
 export enum UserMessageTypes {
     reg = 'reg',
     add_user_to_room = 'add_user_to_room',
-    create_room = 'create_room',   
+    create_room = 'create_room',
+
+    add_ships = 'add_ships',
+    attack = 'attack',
+    randomAttack = 'randomAttack',
 }
 
 export enum ServerMessageTypes {
@@ -14,6 +18,7 @@ export enum ServerMessageTypes {
     turn = 'turn',
     attack = 'attack',
     finish = 'finish',
+    diconnect = 'diconnect',
 
     // responses for all
     update_room = 'update_room',

@@ -15,6 +15,7 @@ function sendRegMessage(userId: string, db: DB, ws: WebSocket) {
         id: 0,
     };
     ws.send(JSON.stringify(messageToUser));
+    console.log(`Sending message:\r\n${JSON.stringify(messageToUser)}`);
 }
 
 export default sendRegMessage;

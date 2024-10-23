@@ -1,5 +1,6 @@
 import { v4 as uuidv4  } from 'uuid';
-import { IdentifiedUser, Room } from './dto.js';
+import WebSocket from 'ws';
+import { IdentifiedUser, Room, Game, GameBoard, UserInGame, Ship, Position, AttackStatus } from './dto.js';
 
 class DB {
     private users: IdentifiedUser[] = [];
@@ -7,20 +8,22 @@ class DB {
 
     constructor() {}
 
-    addUser(clientIP: string) {
+    public addUser(clientIP: string, ws: WebSocket): string {
         const userId = uuidv4();
         this.users.push({
             id: userId,
             login: '',
             password: '',
             isAlive: true,
+            lastRequestDateTime: new Date(),
             clientIP,
             wins: 0,
+            ws,
         });
         return userId;
     }
 
-    addUserAuthData(userId: string, login: string, password: string) {
+    public addUserAuthData(userId: string, login: string, password: string) {
         const user = this.users.find(el => el.id === userId);
         if (user) {
             user.login = login;
@@ -28,49 +31,155 @@ class DB {
         }
     }
 
-    createRoom() {
+    public createRoom(): string {
         const roomId = uuidv4();
         this.rooms.push({
             id: roomId,
             users: [],
-            whoseTurn: null,
-            gameBoard: null,
+            game: null,
         });
         return roomId;
     }
 
-    addUserToRoom(userId: string, roomId: string) {
+    public addUserToRoom(userId: string, roomId: string) {
         const room = this.rooms.find(el => el.id === roomId);
-        if (!room) return;
-        if (room.users.length === 2) return;
-        room.users.push(userId);
-        room.whoseTurn = room.users[0];
+        if (!room)
+            return;
+        const user = this.getUser(userId);
+        if (!user)
+            return;
+        if (room.users.length === 2)
+            return;
+        if (room.users.find(user => user.id === userId))
+            return;
+        room.users.push(user);
     }
 
-    setUserAlive(userId: string) {
+    public createGame(roomId: string): Game | null {
+        const room = this.rooms.find(room => room.id === roomId);
+        if (!room)
+            return null;
+        if (room.users.length < 2)
+            return null;
+        const usersInGame: UserInGame[] = room.users.map(user => {
+            return {
+                ...user,
+                userGameId: uuidv4(),
+                gameBoard: new GameBoard(),
+            };
+        });
+        const game: Game = {
+            id: uuidv4(),
+            users: usersInGame,
+            currentPlayer: usersInGame[0],
+            winner: undefined,
+        };
+        room.game = game;
+        return game;
+    }
+
+    public setUserAlive(userId: string) {
         const user = this.users.find(el => el.id === userId);
-        if (user)
+        if (user) {
             user.isAlive = true;
+            user.lastRequestDateTime = new Date();
+        }
     }
 
-    getUser(userId: string) {
+    public setUserDisconnected(userId: string) {
+        const user = this.users.find(el => el.id === userId);
+        if (!user)
+            return;
+        user.isAlive = false;
+        const userActiveRoomIndex = this.rooms.findIndex(room => room.users.find(el => el.id === userId));
+        if (userActiveRoomIndex === -1)
+            return;
+        const game = this.rooms[userActiveRoomIndex].game;
+        const gameWinner = (game as Game).users.find(el => el.id !== user.id);
+        if (game && gameWinner)
+            this.setGameWinner(game as Game, gameWinner);
+        if (game)
+            this.rooms = this.rooms.filter(room => room.game?.id !== game.id);
+    }
+
+    public getUser(userId: string): IdentifiedUser | undefined {
         return this.users.find(el => el.id === userId);
     }
 
-    getRoom(roomId: string) {
+    public getAllUsers(): IdentifiedUser[] {
+        return this.users;
+    }
+
+    public getRoom(roomId: string): Room | undefined {
         return this.rooms.find(el => el.id === roomId);
     }
 
-    getAvailableRooms() {
-        return this.rooms.filter(room => room.users.length < 2);
-    }
-
-    getUserLogin(userId: string) {
+    public getUserLogin(userId: string): string {
         return this.users.find(el => el.id === userId)?.login || '?';
     }
 
-    getUserWins(userId: string) {
-        return this.users.find(el => el.id === userId)?.wins || 0;
+    public getAllRooms(): Room[] {
+        return this.rooms;
+    }
+
+    public getGame(gameId: string): Game | null | undefined {
+        return this.rooms.find(room => room.game?.id === gameId)?.game;
+    }
+
+    public getUserGame(userId: string): Game | null | undefined {
+        // userId - not a userGameId!
+        return this.rooms.find(room => room.game?.users.find(el => el.id === userId))?.game;
+    }
+
+    public addUserShips(gameId: string, playerId: string, ships: Ship[]): string | null {
+        const room = this.rooms.find(room => room.game?.id === gameId);
+        if (!room)
+            return null;
+        const gameUser = room.game?.users.find(user => user.userGameId === playerId);
+        if (!gameUser)
+            return null;
+        gameUser.gameBoard.addShips(ships);
+        return gameId;
+    }
+
+    private setGameWinner(game: Game, gameUser: UserInGame) {
+        game.winner = gameUser;
+        const user = this.users.find(user => user.id === gameUser.id);
+        if (user)
+            user.wins += 1;
+    }
+
+    public attack(gameId: string, currentPlayerId: string, position: Position) {
+        const game = this.rooms.find(room => room?.game?.id === gameId)?.game;
+        if (!game)
+            return null;
+        if (game.currentPlayer?.userGameId !== currentPlayerId)
+            return null;
+        const gameUser = game.users.find(user => user.userGameId === currentPlayerId);
+        if (!gameUser)
+            return null;
+        const nextGameUser = game.users.find(user => user.userGameId !== currentPlayerId);            
+        if (!nextGameUser)
+            return null;
+        const attackStatus: AttackStatus = nextGameUser.gameBoard.attack(position);
+        if (attackStatus === AttackStatus.killed) {
+            if (nextGameUser?.gameBoard.ifAllShipsAreDead())
+                this.setGameWinner(game, gameUser);
+        }
+        if (!game.winner)
+            game.currentPlayer = nextGameUser;
+        return {
+            attackStatus,
+            gameOver: game.winner ? true : false,
+        };
+    }
+
+    public deleteNonAliveUsers(lastAliveDate: Date) {
+        for (let i = 0; i < this.users.length; i++) {
+            const user = this.users[i];
+            if (!user.isAlive && user.lastRequestDateTime <= lastAliveDate)
+                this.users.splice(i, 1);
+        }
     }
 }
 

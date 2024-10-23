@@ -94,12 +94,19 @@ class DB {
         const userActiveRoomIndex = this.rooms.findIndex(room => room.users.find(el => el.id === userId));
         if (userActiveRoomIndex === -1)
             return;
-        const game = this.rooms[userActiveRoomIndex].game;
-        const gameWinner = (game as Game).users.find(el => el.id !== user.id);
-        if (game && gameWinner)
-            this.setGameWinner(game as Game, gameWinner);
-        if (game)
-            this.rooms = this.rooms.filter(room => room.game?.id !== game.id);
+        this.rooms[userActiveRoomIndex].users = this.rooms[userActiveRoomIndex].users.filter(el => el.id !== userId);
+        if (!this.rooms[userActiveRoomIndex].users.length) {
+            this.rooms.splice(userActiveRoomIndex, 1);
+        } else {
+            const game = this.rooms[userActiveRoomIndex].game;
+            if (game) {
+                const gameWinner = (game as Game).users.find(el => el.id !== user.id);
+                if (gameWinner)
+                    this.setGameWinner(game as Game, gameWinner);
+                game.users = game.users.filter(user => user.id !== userId);
+                this.rooms[userActiveRoomIndex].game = null;
+            }
+        }
     }
 
     public getUser(userId: string): IdentifiedUser | undefined {

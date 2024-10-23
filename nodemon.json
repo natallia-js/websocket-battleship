@@ -1,7 +1,7 @@
 {
     "watch": ["src", "index.ts"],
     "ignore": [".git", "node_modules"],
-    "ext": "ts",
+    "ext": "ts, js",
     "execMap": {
       "ts": "ts-node-esm"
     }

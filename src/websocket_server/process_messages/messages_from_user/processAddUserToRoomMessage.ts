@@ -5,7 +5,6 @@ function processAddUserToRoomMessage(userId: string, userMessage: UserMessage, d
     const userMessageData = JSON.parse(userMessage?.data) || {};
     const roomId = userMessageData.indexRoom;
     db.addUserToRoom(userId, roomId);
-    
     return roomId;
 }
 

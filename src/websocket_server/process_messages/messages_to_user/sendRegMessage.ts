@@ -1,6 +1,6 @@
 import WebSocket from 'ws';
 import { ServerMessageTypes } from '../../dto.js';
-import DB from '../../../db/index.js';
+import DB from '@db/index';
 
 function sendRegMessage(userId: string, db: DB, ws: WebSocket) {
     const userName = db.getUserLogin(userId);

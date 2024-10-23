@@ -13,7 +13,8 @@ const config = {
         extensions: ['.ts'],
         alias: {
             '@db': path.resolve(import.meta.dirname, 'src/db'),
-            '@http_server': path.resolve(import.meta.dirname, 'src/http_server')
+            '@http_server': path.resolve(import.meta.dirname, 'src/http_server'),
+            '@websocket_server': path.resolve(import.meta.dirname, 'src/websocket_server')
         },
     },     
     module: {

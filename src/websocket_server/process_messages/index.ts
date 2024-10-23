@@ -1,6 +1,6 @@
 import WebSocket from 'ws';
 import { UserMessageTypes, UserMessage } from '../dto.js';
-import DB from '../../db/index.js';
+import DB from '@db/index.js';
 import processRegMessage from './messages_from_user/processRegMessage.js';
 import sendRegMessage from './messages_to_user/sendRegMessage.js';
 import sendUpdateWinnersMessages from './messages_to_user/sendUpdateWinnersMessages.js';

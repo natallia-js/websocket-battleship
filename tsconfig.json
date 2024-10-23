@@ -1,7 +1,12 @@
 {
     "compilerOptions": {
         "baseUrl": ".",
-        "rootDir": "src",     
+        "rootDirs": [".", "src"],
+        "paths": {
+            "@db/*": ["src/db/*"],
+            "@http_server/*": ["src/http_server/*"],
+            "@websocket_server/*": ["src/websocket_server/*"]
+        },
         "forceConsistentCasingInFileNames": true,
         "allowSyntheticDefaultImports": true,
         "esModuleInterop": true,

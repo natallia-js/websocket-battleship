@@ -1,5 +1,5 @@
 import { ServerMessageTypes } from '../../dto.js';
-import DB from '../../../db/index.js';
+import DB from '@db/index.js';
 
 function sendUpdateWinnersMessages(db: DB) {
     const users = db.getAllUsers();
@@ -7,7 +7,7 @@ function sendUpdateWinnersMessages(db: DB) {
     users.forEach(user => {
         const messageToUser = {
             type: ServerMessageTypes.update_winners,
-            data: users.filter(user => user.isAlive).map(user => ({
+            data: users.map(user => ({
                 name: user.login,
                 wins: user.wins,
             })),

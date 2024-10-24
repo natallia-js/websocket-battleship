@@ -3,12 +3,11 @@ import { ServerMessageTypes } from '../../dto.js';
 import DB from '@db/index';
 
 function sendRegMessage(userId: string, db: DB, ws: WebSocket) {
-    const userName = db.getUserLogin(userId);
     const messageToUser = {
         type: ServerMessageTypes.reg,
         data: {
-            name: userName,
-            index: userName,
+            name: db.getUserLogin(userId),
+            index: userId,
             error: false,
             errorText: '',
         },

@@ -141,6 +141,10 @@ class DB {
         return this.rooms.filter(room => room.users.length < 2);
     }
 
+    public getAllRooms(): Room[] {
+        return this.rooms;
+    }
+
     public getGame(gameId: string): Game | null | undefined {
         return this.rooms.find(room => room.game?.id === gameId)?.game;
     }

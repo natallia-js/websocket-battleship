@@ -6,6 +6,8 @@ export enum UserMessageTypes {
     add_ships = 'add_ships',
     attack = 'attack',
     randomAttack = 'randomAttack',
+
+    single_play = 'single_play',
 }
 
 export enum ServerMessageTypes {
@@ -26,6 +28,12 @@ export enum ServerMessageTypes {
 }
 
 export type UserMessage = {
+    type: string;
+    data: any;
+    id: number;
+}
+
+export type ServerMessage = {
     type: string;
     data: any;
     id: number;

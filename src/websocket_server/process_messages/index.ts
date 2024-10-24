@@ -15,7 +15,8 @@ import sendTurnMessages from './messages_to_user/sendTurnMessages.js';
 import sendFinishMessages from './messages_to_user/sendFinishMessages.js';
 import sendAttackMessages from './messages_to_user/sendAttackMessages.js';
 import processRandomAttackMessage from './messages_from_user/processRandomAttackMessage.js';
-import Bot from '../bot.js';
+import { startBotWebsocket } from '../../websocket_client_bot/index.js';
+//import Bot from '../../websocket_client_bot/bot.js';
 
 function processAttackResult(processAttackMessageResult: any, db: DB) {
     if (!processAttackMessageResult)
@@ -71,16 +72,21 @@ function processUserMessage(userWSData: UserWSData, data: any, db: DB, ws: WebSo
             const processRandomAttackMessageResult = processRandomAttackMessage(userMessage, db);
             processAttackResult(processRandomAttackMessageResult, db);
             break;
-        case 'single_play':
-            const bot = new Bot();
-            bot.generateRandomShipMap();
-            console.log(bot.map);
-            console.log(bot.ships)
-            const botId = processRegMessage({
+        case UserMessageTypes.single_play:
+            startBotWebsocket(userWSData.getUserID());
+            processCreateRoomMessage(userWSData.getUserID(), db);
+            sendUpdateRoomMessages(db);
+            /*const botId = processRegMessage({
                 type: 'single_play',
                 data: JSON.stringify({ name: 'bot', password: 'bot' }),
                 id: 0,
             }, db, undefined);
+
+            const bot = new Bot('');
+            bot.generateRandomShipMap();
+            console.log(bot.map);
+            console.log(bot.ships)
+            
             if (!botId) return;
             const singlePlayRoomId = processCreateRoomMessage(botId, db);
             processAddUserToRoomMessage(userWSData.getUserID(), {
@@ -89,31 +95,30 @@ function processUserMessage(userWSData: UserWSData, data: any, db: DB, ws: WebSo
                 id: 0,
             }, db);
             sendUpdateRoomMessages(db);
-            sendUpdateWinnersMessages(db);            
+            //sendUpdateWinnersMessages(db);            
             sendCreateGameMessages(singlePlayRoomId, db);
-            const gameId = processAddShipsMessage({
+            const botGame = db.getRoom(singlePlayRoomId)?.game;
+            if (!botGame)
+                return;
+            processAddShipsMessage({
                 type: UserMessageTypes.add_ships,
                 data: JSON.stringify({
-                    gameId: <number | string>,
-                    ships:
-                        [
-                            {
-                                position: {
-                                    x: <number>,
-                                    y: <number>,
-                                },
-                                direction: <boolean>,
-                                length: <number>,
-                                type: "small"|"medium"|"large"|"huge",
-                            }
-                        ],
-                    indexPlayer: <number |
-                })
+                    gameId: botGame.id,
+                    ships: bot.ships.map(ship => ({
+                        position: {
+                            x: ship.getPosition().x,
+                            y: ship.getPosition().y,
+                        },
+                        direction: ship.getDirection(),
+                        length: ship.getLength(),
+                        type: ship.getType(),
+                    })),
+                    indexPlayer: botGame.users.find(user => user.id === botId)?.userGameId,
+                }),
+                id: 0,
             }, db);
-            if (!gameId)
-                return;
-            sendStartGameMessages(gameId, db);
-            sendTurnMessages(gameId, db);
+            sendStartGameMessages(botGame.id, db);
+            sendTurnMessages(botGame.id, db);*/
             break;
         default:
             console.log(`Unknown user message type: \x1b[31m${userMessage.type}\x1b[0m`);

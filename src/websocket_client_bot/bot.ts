@@ -17,6 +17,11 @@
     }
 
     class Bot {
+        private userId: string = '';
+        private roomId: string = '';
+        private gameId: string = '';
+        private playerId: string = '';
+
         private gameFieldBorderX = ['A','B','C','D','E','F','G','H','I','J'];
         private gameFieldBorderY = ['1','2','3','4','5','6','7','8','9','10'];
         private shipsConfiguration: ShipConfiguration[] = [
@@ -35,10 +40,44 @@
         private CELL_WITH_SHIP = 1;
         private CELL_EMPTY = 0;
 
-        constructor() {
+        constructor(userId: string = '') {
+            this.userId = userId;
             for (let i = 0; i < this.shipsConfiguration.length; i++) {
                 this._hitsForWin = +this._hitsForWin + (this.shipsConfiguration[i].maxShips*this.shipsConfiguration[i].pointCount);
-            }    
+            }
+            this.generateShotMap(); 
+        }
+
+        public setUserId(value: string) {
+            this.userId = value;
+        }
+
+        public getUserId() {
+            return this.userId;
+        }
+
+        public setRoomId(value: string) {
+            this.roomId = value;
+        }
+
+        public getRoomId() {
+            return this.roomId;
+        }
+
+        public setGameId(value: string) {
+            this.gameId = value;
+        }
+
+        public getGameId() {
+            return this.gameId;
+        }
+
+        public setPlayerId(value: string) {
+            this.playerId = value;
+        }
+
+        public getPlayerId() {
+            return this.playerId;
         }
 
         /**
@@ -56,27 +95,14 @@
             return 'pc_x' + xPoint + '_y' + yPoint;
         },*/
 
-        /**
-         * Создает масив с координатами полей, из которых компьютер
-         * случайно выбирает координаты для обстрела
-         * @return {Array|SeeBattle.prototype.generateShotMap.map}
-         */
-        /*generateShotMap: function(){
-            var map = [];
-            for(var yPoint=0;yPoint<this.gameFieldBorderY.length; yPoint++){
-                for(var xPoint=0;xPoint<this.gameFieldBorderX.length; xPoint++){
-                    map.push({y: yPoint, x: xPoint});
-                }
-            }
-            return map;
-        },*/
+        
 
         public ships: Ship[] = [];
         public map: number[][] = [];
+        private shotMap: { y: number, x: number }[] = [];
 
         /**
          * Генерирует массив содержащий информацию о том есть или нет корабля
-         * @return {Array}
          */
         public generateRandomShipMap() {
             //const ships: Ship[] = [];
@@ -193,6 +219,18 @@
         }
 
         /**
+         * Создает масив с координатами полей, из которых компьютер
+         * случайно выбирает координаты для обстрела
+         */
+        private generateShotMap() {
+            for (let yPoint = 0; yPoint < this.gameFieldBorderY.length; yPoint++) {
+                for (let xPoint = 0; xPoint < this.gameFieldBorderX.length; xPoint++) {
+                    this.shotMap.push({ y: yPoint, x: xPoint });
+                }
+            }
+        }
+
+        /**
          * Обработчик клика по ячейке
          */
         /*userFire: function(event){
@@ -236,17 +274,16 @@
 
         /**
          * Выстрел компьютера
-         *
          */
-        /*pcFire: function(){
-            if(this.isGameStopped()){
+        public fire(){
+            /*if(this.isGameStopped()){
                 return;
-            }
+            }*/
             // берется случайный выстрел из сгенерированной ранее карты
-            var randomShotIndex = this.getRandomInt(0, this._pcShotMap.length);
-            var randomShot = JSON.parse(JSON.stringify(this._pcShotMap[randomShotIndex]));
+            var randomShotIndex = this.getRandomInt(0, this.shotMap.length);
+            var randomShot = JSON.parse(JSON.stringify(this.shotMap[randomShotIndex]));
             // удаление чтобы не было выстрелов повторных
-            this._pcShotMap.splice(randomShotIndex, 1);
+            this.shotMap.splice(randomShotIndex, 1);
 
             var firedEl = document.getElementById(this.getPointBlockIdByCoords(randomShot.y, randomShot.x, 'user'));
             if(this._userShipsMap[randomShot.y][randomShot.x] === this.CELL_EMPTY){
@@ -263,7 +300,7 @@
             }
             this._pcGoing = false;
             this.updateToolbar();
-        },*/
+        }
         /**
          * Остановка игры
          */

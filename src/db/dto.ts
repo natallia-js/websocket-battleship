@@ -72,6 +72,18 @@ export class Ship {
     public getShipType() {
         return this.type;
     }
+    public getPosition() {
+        return this.position;
+    }
+    public getDirection() {
+        return this.direction;
+    }
+    public getLength() {
+        return this.length;
+    }
+    public getType() {
+        return this.type;
+    }
 }
 
 export class GameBoard {

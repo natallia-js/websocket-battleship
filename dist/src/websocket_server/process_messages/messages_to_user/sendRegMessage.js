@@ -1,8 +1,5 @@
-import WebSocket from 'ws';
 import { ServerMessageTypes } from '../../dto.js';
-import DB from '@db/index';
-
-function sendRegMessage(userId: string, db: DB, ws: WebSocket) {
+function sendRegMessage(userId, db, ws) {
     const userName = db.getUserLogin(userId);
     const messageToUser = {
         type: ServerMessageTypes.reg,
@@ -18,5 +15,5 @@ function sendRegMessage(userId: string, db: DB, ws: WebSocket) {
         ws.send(JSON.stringify(messageToUser));
     console.log(`Sending message:\r\n${JSON.stringify(messageToUser)}`);
 }
-
 export default sendRegMessage;
+//# sourceMappingURL=sendRegMessage.js.map

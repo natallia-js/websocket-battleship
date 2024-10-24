@@ -5,9 +5,8 @@ export interface User {
     password: string,
     isAlive: boolean,
     lastRequestDateTime: Date,
-    clientIP: string,
     wins: number,
-    ws: WebSocket,
+    ws: WebSocket | undefined,
 }
 
 export interface IdentifiedUser extends User {

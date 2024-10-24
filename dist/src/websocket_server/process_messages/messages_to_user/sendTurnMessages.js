@@ -1,9 +1,8 @@
 import { ServerMessageTypes } from '../../dto.js';
-import DB from '../../../db/index.js';
-
-function sendTurnMessages(gameId: string, db: DB) {
+function sendTurnMessages(gameId, db) {
     const game = db.getGame(gameId);
-    if (!game) return;
+    if (!game)
+        return;
     game.users.forEach(user => {
         const messageToUser = {
             type: ServerMessageTypes.turn,
@@ -17,5 +16,5 @@ function sendTurnMessages(gameId: string, db: DB) {
         console.log(`Sending message:\r\n${JSON.stringify(messageToUser)}`);
     });
 }
-
 export default sendTurnMessages;
+//# sourceMappingURL=sendTurnMessages.js.map

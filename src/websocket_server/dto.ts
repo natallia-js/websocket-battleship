@@ -30,3 +30,24 @@ export type UserMessage = {
     data: any;
     id: number;
 }
+
+export class UserWSData {
+    private clientIP: string;
+    private userId: string;
+    constructor(clientIP: string | undefined, userId: string | undefined) {
+        this.setClientIP(clientIP);
+        this.setUserID(userId);
+    }
+    public setClientIP(clientIP: string | undefined) {
+        this.clientIP = clientIP || '?';
+    }
+    public setUserID(userId: string | undefined) {
+        this.userId = userId || '';
+    }
+    public getClientIP() {
+        return this.clientIP;
+    }
+    public getUserID() {
+        return this.userId;
+    }
+}

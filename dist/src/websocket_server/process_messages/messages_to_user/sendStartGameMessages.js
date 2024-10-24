@@ -1,14 +1,16 @@
 import { ServerMessageTypes } from '../../dto.js';
-import DB from '../../../db/index.js';
-
-function sendTurnMessages(gameId: string, db: DB) {
+function sendStartGameMessages(gameId, db) {
     const game = db.getGame(gameId);
-    if (!game) return;
+    if (!game)
+        return;
+    if (game.users.find(user => !user.gameBoard.getShipsNumber()))
+        return;
     game.users.forEach(user => {
         const messageToUser = {
-            type: ServerMessageTypes.turn,
+            type: ServerMessageTypes.start_game,
             data: JSON.stringify({
-                currentPlayer: game.currentPlayer?.userGameId,
+                ships: user.gameBoard.getShips(),
+                currentPlayerIndex: user.userGameId,
             }),
             id: 0,
         };
@@ -17,5 +19,5 @@ function sendTurnMessages(gameId: string, db: DB) {
         console.log(`Sending message:\r\n${JSON.stringify(messageToUser)}`);
     });
 }
-
-export default sendTurnMessages;
+export default sendStartGameMessages;
+//# sourceMappingURL=sendStartGameMessages.js.map

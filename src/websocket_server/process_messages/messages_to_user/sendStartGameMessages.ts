@@ -14,7 +14,8 @@ function sendStartGameMessages(gameId: string, db: DB) {
             }),
             id: 0,
         };
-        user.ws.send(JSON.stringify(messageToUser));
+        if (user.ws)
+            user.ws.send(JSON.stringify(messageToUser));
         console.log(`Sending message:\r\n${JSON.stringify(messageToUser)}`);
     });
 }

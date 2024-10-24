@@ -1,9 +1,8 @@
 import { ServerMessageTypes } from '../../dto.js';
-import DB from '@db/index.js';
-
-function sendUpdateWinnersMessages(db: DB) {
+function sendUpdateWinnersMessages(db) {
     const users = db.getAllUsers();
-    if (!users?.length) return;
+    if (!users?.length)
+        return;
     users.forEach(user => {
         const messageToUser = {
             type: ServerMessageTypes.update_winners,
@@ -18,5 +17,5 @@ function sendUpdateWinnersMessages(db: DB) {
         console.log(`Sending message:\r\n${JSON.stringify(messageToUser)}`);
     });
 }
-
 export default sendUpdateWinnersMessages;
+//# sourceMappingURL=sendUpdateWinnersMessages.js.map

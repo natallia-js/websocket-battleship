@@ -1,15 +1,14 @@
 import { ServerMessageTypes } from '../../dto.js';
-import DB from '../../../db/index.js';
-
-function sendTurnMessages(gameId: string, db: DB) {
+function sendFinishMessages(gameId, db) {
     const game = db.getGame(gameId);
-    if (!game) return;
+    if (!game)
+        return;
     game.users.forEach(user => {
         const messageToUser = {
-            type: ServerMessageTypes.turn,
-            data: JSON.stringify({
-                currentPlayer: game.currentPlayer?.userGameId,
-            }),
+            type: ServerMessageTypes.finish,
+            data: {
+                winPlayer: game.winner?.userGameId,
+            },
             id: 0,
         };
         if (user.ws)
@@ -17,5 +16,5 @@ function sendTurnMessages(gameId: string, db: DB) {
         console.log(`Sending message:\r\n${JSON.stringify(messageToUser)}`);
     });
 }
-
-export default sendTurnMessages;
+export default sendFinishMessages;
+//# sourceMappingURL=sendFinishMessages.js.map

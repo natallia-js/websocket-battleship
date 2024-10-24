@@ -1,9 +1,8 @@
 import { ServerMessageTypes } from '../../dto.js';
-import DB from '../../../db/index.js';
-
-function sendDiconnectMessage(disconnectedUserId: string, db: DB) {
+function sendDiconnectMessage(disconnectedUserId, db) {
     const game = db.getUserGame(disconnectedUserId);
-    if (!game) return;
+    if (!game)
+        return;
     game.users.forEach(user => {
         if (user.id === disconnectedUserId)
             return;
@@ -16,5 +15,5 @@ function sendDiconnectMessage(disconnectedUserId: string, db: DB) {
         console.log(`Sending message:\r\n${JSON.stringify(messageToUser)}`);
     });
 }
-
 export default sendDiconnectMessage;
+//# sourceMappingURL=sendDiconnectMessage.js.map

@@ -1,14 +1,14 @@
 import { ServerMessageTypes } from '../../dto.js';
-import DB from '../../../db/index.js';
-
-function sendFinishMessages(gameId: string, db: DB) {
-    const game = db.getGame(gameId);
-    if (!game) return;
+function sendCreateGameMessages(roomId, db) {
+    const game = db.createGame(roomId);
+    if (!game)
+        return;
     game.users.forEach(user => {
         const messageToUser = {
-            type: ServerMessageTypes.finish,
+            type: ServerMessageTypes.create_game,
             data: {
-                winPlayer: game.winner?.userGameId,
+                idGame: game.id,
+                idPlayer: user.userGameId,
             },
             id: 0,
         };
@@ -17,5 +17,5 @@ function sendFinishMessages(gameId: string, db: DB) {
         console.log(`Sending message:\r\n${JSON.stringify(messageToUser)}`);
     });
 }
-
-export default sendFinishMessages;
+export default sendCreateGameMessages;
+//# sourceMappingURL=sendCreateGameMessages.js.map

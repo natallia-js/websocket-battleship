@@ -15,7 +15,8 @@ function sendAttackMessages(gameId: string, playerId: string, position: Position
             }),
             id: 0,
         };
-        user.ws.send(JSON.stringify(messageToUser));
+        if (user.ws)
+            user.ws.send(JSON.stringify(messageToUser));
         console.log(`Sending message:\r\n${JSON.stringify(messageToUser)}`);
     });
 }

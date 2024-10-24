@@ -3,10 +3,10 @@ import { startWebSocketServer } from './src/websocket_server/index.js';
 
 const HTTP_PORT = 8181;
 
-console.log(`Start static http server on the ${HTTP_PORT} port!`);
+console.log(`Start static http server on port ${HTTP_PORT}`);
 httpServer.listen(HTTP_PORT);
 
 const WSS_PORT = 3000;
 
-console.log(`Start WebSocket server on the ${WSS_PORT} port!`);
+console.log(`Start WebSocket server on port ${WSS_PORT}`);
 startWebSocketServer(WSS_PORT);

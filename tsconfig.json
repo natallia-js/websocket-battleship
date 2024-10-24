@@ -1,6 +1,7 @@
 {
     "compilerOptions": {
         "baseUrl": ".",
+        "rootDir": ".",
         "rootDirs": [".", "src"],
         "paths": {
             "@db/*": ["src/db/*"],

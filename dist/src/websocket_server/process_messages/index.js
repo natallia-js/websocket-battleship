@@ -1,6 +1,4 @@
-import WebSocket from 'ws';
-import { UserMessageTypes, UserMessage, UserWSData } from '../dto.js';
-import DB from '@db/index.js';
+import { UserMessageTypes } from '../dto.js';
 import processRegMessage from './messages_from_user/processRegMessage.js';
 import sendRegMessage from './messages_to_user/sendRegMessage.js';
 import sendUpdateWinnersMessages from './messages_to_user/sendUpdateWinnersMessages.js';
@@ -15,33 +13,27 @@ import sendTurnMessages from './messages_to_user/sendTurnMessages.js';
 import sendFinishMessages from './messages_to_user/sendFinishMessages.js';
 import sendAttackMessages from './messages_to_user/sendAttackMessages.js';
 import processRandomAttackMessage from './messages_from_user/processRandomAttackMessage.js';
-import Bot from '../bot.js';
-
-function processAttackResult(processAttackMessageResult: any, db: DB) {
+import { Bot } from '../bot.js';
+function processAttackResult(processAttackMessageResult, db) {
     if (!processAttackMessageResult)
         return;
-    sendAttackMessages(
-        processAttackMessageResult.gameId,
-        processAttackMessageResult.playerId, // player that made a shot
-        processAttackMessageResult.position,
-        processAttackMessageResult.attackStatus,
-        db
-    );
+    sendAttackMessages(processAttackMessageResult.gameId, processAttackMessageResult.playerId, processAttackMessageResult.position, processAttackMessageResult.attackStatus, db);
     if (!processAttackMessageResult.gameOver) {
         sendTurnMessages(processAttackMessageResult.gameId, db);
-    } else {
+    }
+    else {
         sendFinishMessages(processAttackMessageResult.gameId, db);
         sendUpdateWinnersMessages(db);
     }
 }
-
-function processUserMessage(userWSData: UserWSData, data: any, db: DB, ws: WebSocket) {
-    const userMessage: UserMessage = JSON.parse(data.toString());
+function processUserMessage(userWSData, data, db, ws) {
+    const userMessage = JSON.parse(data.toString());
     console.log(`Received command \x1b[33m${userMessage.type}\x1b[0m from user at ${userWSData.getClientIP()} (id = ${userWSData.getUserID()})`);
-    switch(userMessage.type) {
+    switch (userMessage.type) {
         case UserMessageTypes.reg:
             const userId = processRegMessage(userMessage, db, ws);
-            if (!userId) return;
+            if (!userId)
+                return;
             userWSData.setUserID(userId);
             sendRegMessage(userId, db, ws);
             sendUpdateRoomMessages(db);
@@ -72,16 +64,15 @@ function processUserMessage(userWSData: UserWSData, data: any, db: DB, ws: WebSo
             processAttackResult(processRandomAttackMessageResult, db);
             break;
         case 'single_play':
-            const bot = new Bot();
-            bot.generateRandomShipMap();
-            console.log(bot.map);
-            console.log(bot.ships)
+            const map = new Bot().generateRandomShipMap;
+            console.log(map);
             const botId = processRegMessage({
                 type: 'single_play',
                 data: JSON.stringify({ name: 'bot', password: 'bot' }),
                 id: 0,
             }, db, undefined);
-            if (!botId) return;
+            if (!botId)
+                return;
             const singlePlayRoomId = processCreateRoomMessage(botId, db);
             processAddUserToRoomMessage(userWSData.getUserID(), {
                 type: UserMessageTypes.add_user_to_room,
@@ -89,36 +80,13 @@ function processUserMessage(userWSData: UserWSData, data: any, db: DB, ws: WebSo
                 id: 0,
             }, db);
             sendUpdateRoomMessages(db);
-            sendUpdateWinnersMessages(db);            
+            sendUpdateWinnersMessages(db);
             sendCreateGameMessages(singlePlayRoomId, db);
-            const gameId = processAddShipsMessage({
-                type: UserMessageTypes.add_ships,
-                data: JSON.stringify({
-                    gameId: <number | string>,
-                    ships:
-                        [
-                            {
-                                position: {
-                                    x: <number>,
-                                    y: <number>,
-                                },
-                                direction: <boolean>,
-                                length: <number>,
-                                type: "small"|"medium"|"large"|"huge",
-                            }
-                        ],
-                    indexPlayer: <number |
-                })
-            }, db);
-            if (!gameId)
-                return;
-            sendStartGameMessages(gameId, db);
-            sendTurnMessages(gameId, db);
             break;
         default:
             console.log(`Unknown user message type: \x1b[31m${userMessage.type}\x1b[0m`);
             break;
     }
 }
-
 export default processUserMessage;
+//# sourceMappingURL=index.js.map
